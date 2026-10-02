@@ -1,0 +1,6 @@
+{
+  "name": "JEE Pulse",
+  "description": "JEE Main & Advanced PYQ practice studio with timed exam simulation, detailed step-by-step solutions, AI-generated custom mock tests, and personalized weak-area analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

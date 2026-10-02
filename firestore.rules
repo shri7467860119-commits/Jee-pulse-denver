@@ -1,0 +1,233 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Global Security Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidLeaderboardProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 60 &&
+             data.xpPoints is int && data.xpPoints >= 0 && data.xpPoints <= 10000000 &&
+             data.currentStreak is int && data.currentStreak >= 0 && data.currentStreak <= 3650 &&
+             data.bestStreak is int && data.bestStreak >= 0 && data.bestStreak <= 3650 &&
+             data.questionsSolved is int && data.questionsSolved >= 0 && data.questionsSolved <= 1000000 &&
+             data.correctAnswers is int && data.correctAnswers >= 0 && data.correctAnswers <= 1000000 &&
+             data.testsCompleted is int && data.testsCompleted >= 0 && data.testsCompleted <= 100000 &&
+             data.highScorePercent is int && data.highScorePercent >= 0 && data.highScorePercent <= 100 &&
+             data.badgesUnlocked is list && data.badgesUnlocked.size() <= 30 &&
+             (data.badgesUnlocked.size() == 0 || (data.badgesUnlocked[0] is string && data.badgesUnlocked[0].size() <= 60)) &&
+             data.targetExam is string && data.targetExam.size() <= 40 &&
+             data.targetExam in ['JEE Main 2026', 'JEE Advanced 2026', 'JEE Main & Adv 2026'] &&
+             data.visibility is string && data.visibility.size() <= 20 && data.visibility == 'public' &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidTestAttempt(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.testTitle is string && data.testTitle.size() >= 1 && data.testTitle.size() <= 120 &&
+             data.testType is string && data.testType.size() <= 30 &&
+             data.testType in ['PYQ_PRACTICE', 'FULL_MOCK', 'AI_CUSTOM_MOCK', 'STUDY_PLAN_DRILL'] &&
+             data.subjectFilter is string && data.subjectFilter.size() >= 1 && data.subjectFilter.size() <= 60 &&
+             data.totalQuestions is int && data.totalQuestions >= 1 && data.totalQuestions <= 200 &&
+             data.attemptedCount is int && data.attemptedCount >= 0 && data.attemptedCount <= 200 &&
+             data.correctCount is int && data.correctCount >= 0 && data.correctCount <= 200 &&
+             data.incorrectCount is int && data.incorrectCount >= 0 && data.incorrectCount <= 200 &&
+             data.scoreObtained is int && data.scoreObtained >= -200 && data.scoreObtained <= 800 &&
+             data.maxScore is int && data.maxScore >= 1 && data.maxScore <= 800 &&
+             data.accuracyPercent is int && data.accuracyPercent >= 0 && data.accuracyPercent <= 100 &&
+             data.timeSpentSeconds is int && data.timeSpentSeconds >= 0 && data.timeSpentSeconds <= 36000 &&
+             data.xpEarned is int && data.xpEarned >= 0 && data.xpEarned <= 50000 &&
+             data.weakTopics is list && data.weakTopics.size() <= 20 &&
+             (data.weakTopics.size() == 0 || (data.weakTopics[0] is string && data.weakTopics[0].size() <= 80)) &&
+             data.strongTopics is list && data.strongTopics.size() <= 20 &&
+             (data.strongTopics.size() == 0 || (data.strongTopics[0] is string && data.strongTopics[0].size() <= 80)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidStudyTask(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.dayLabel is string && data.dayLabel.size() >= 1 && data.dayLabel.size() <= 40 &&
+             data.subject is string && data.subject.size() <= 30 &&
+             data.subject in ['Physics', 'Chemistry', 'Mathematics'] &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 80 &&
+             data.activityType is string && data.activityType.size() <= 30 &&
+             data.activityType in ['CONCEPT_REVIEW', 'PYQ_DRILL', 'AI_MOCK_TEST', 'FORMULA_REVISION'] &&
+             data.targetPyqCount is int && data.targetPyqCount >= 1 && data.targetPyqCount <= 100 &&
+             data.durationMinutes is int && data.durationMinutes >= 5 && data.durationMinutes <= 360 &&
+             data.priorityLevel is string && data.priorityLevel.size() <= 30 &&
+             data.priorityLevel in ['HIGH_WEAK_AREA', 'MEDIUM_PRACTICE', 'REVISION'] &&
+             data.completed is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidBookmark(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.questionId is string && data.questionId.size() >= 1 && data.questionId.size() <= 80 &&
+             data.subject is string && data.subject.size() <= 30 &&
+             data.subject in ['Physics', 'Chemistry', 'Mathematics'] &&
+             data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 80 &&
+             data.personalNote is string && data.personalNote.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 4. Collection Rules: Public Gamification Leaderboard (Zero PII)
+    match /leaderboard/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && existing().visibility == 'public';
+      allow list: if isSignedIn() && existing().visibility == 'public';
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'xpPoints', 'currentStreak', 'bestStreak',
+                         'questionsSolved', 'correctAnswers', 'testsCompleted', 'highScorePercent',
+                         'badgesUnlocked', 'targetExam', 'visibility', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'xpPoints', 'currentStreak', 'bestStreak',
+                         'questionsSolved', 'correctAnswers', 'testsCompleted', 'highScorePercent',
+                         'badgesUnlocked', 'targetExam', 'visibility', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidLeaderboardProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidLeaderboardProfile(incoming()) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'xpPoints', 'currentStreak', 'bestStreak',
+                         'questionsSolved', 'correctAnswers', 'testsCompleted', 'highScorePercent',
+                         'badgesUnlocked', 'targetExam', 'visibility', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid;
+    }
+
+    // 5. Collection Rules: Test Attempts (Private per User)
+    match /test_attempts/{attemptId} {
+      allow get: if isSignedIn() && isValidId(attemptId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(attemptId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'testTitle', 'testType', 'subjectFilter', 'totalQuestions',
+                         'attemptedCount', 'correctCount', 'incorrectCount', 'scoreObtained',
+                         'maxScore', 'accuracyPercent', 'timeSpentSeconds', 'xpEarned',
+                         'weakTopics', 'strongTopics', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'testTitle', 'testType', 'subjectFilter', 'totalQuestions',
+                         'attemptedCount', 'correctCount', 'incorrectCount', 'scoreObtained',
+                         'maxScore', 'accuracyPercent', 'timeSpentSeconds', 'xpEarned',
+                         'weakTopics', 'strongTopics', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidTestAttempt(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(attemptId) &&
+                       isValidTestAttempt(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['testTitle', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(attemptId) && existing().userId == request.auth.uid;
+    }
+
+    // 6. Collection Rules: Personalized Study Tasks (Private per User)
+    match /study_tasks/{taskId} {
+      allow get: if isSignedIn() && isValidId(taskId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'dayLabel', 'subject', 'topic', 'activityType',
+                         'targetPyqCount', 'durationMinutes', 'priorityLevel', 'completed',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'dayLabel', 'subject', 'topic', 'activityType',
+                         'targetPyqCount', 'durationMinutes', 'priorityLevel', 'completed',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidStudyTask(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       isValidStudyTask(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'completed', 'targetPyqCount', 'durationMinutes', 'priorityLevel', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(taskId) && existing().userId == request.auth.uid;
+    }
+
+    // 7. Collection Rules: Bookmarked PYQ Questions (Private per User)
+    match /bookmarks/{bookmarkId} {
+      allow get: if isSignedIn() && isValidId(bookmarkId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(bookmarkId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'questionId', 'subject', 'topic', 'personalNote',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'questionId', 'subject', 'topic', 'personalNote',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidBookmark(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(bookmarkId) &&
+                       isValidBookmark(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['personalNote', 'updatedAt']);
+
+      allow delete: if isSignedIn() && isValidId(bookmarkId) && existing().userId == request.auth.uid;
+    }
+  }
+}

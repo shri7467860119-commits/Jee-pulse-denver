@@ -1,0 +1,318 @@
+{
+  "entities": {
+    "LeaderboardProfile": {
+      "title": "LeaderboardProfile",
+      "description": "Public gamification and leaderboard standing for an authenticated JEE aspirant (contains zero PII).",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated user (must match document ID and request.auth.uid)."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Public display name shown on the leaderboard (1-60 chars)."
+        },
+        "xpPoints": {
+          "type": "integer",
+          "description": "Total gamification XP points earned from PYQs, streaks, and mocks."
+        },
+        "currentStreak": {
+          "type": "integer",
+          "description": "Current consecutive days of practice streak."
+        },
+        "bestStreak": {
+          "type": "integer",
+          "description": "Highest consecutive days of practice streak achieved."
+        },
+        "questionsSolved": {
+          "type": "integer",
+          "description": "Total number of PYQ and mock questions attempted."
+        },
+        "correctAnswers": {
+          "type": "integer",
+          "description": "Total number of questions answered correctly."
+        },
+        "testsCompleted": {
+          "type": "integer",
+          "description": "Total number of practice and mock tests completed."
+        },
+        "highScorePercent": {
+          "type": "integer",
+          "description": "Highest percentage score achieved in any test (0-100)."
+        },
+        "badgesUnlocked": {
+          "type": "array",
+          "description": "List of unlocked badge IDs (bounded up to 30 strings)."
+        },
+        "targetExam": {
+          "type": "string",
+          "enum": ["JEE Main 2026", "JEE Advanced 2026", "JEE Main & Adv 2026"],
+          "description": "Target JEE examination."
+        },
+        "visibility": {
+          "type": "string",
+          "enum": ["public"],
+          "description": "Visibility scope for leaderboard query alignment ('public')."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "xpPoints",
+        "currentStreak",
+        "bestStreak",
+        "questionsSolved",
+        "correctAnswers",
+        "testsCompleted",
+        "highScorePercent",
+        "badgesUnlocked",
+        "targetExam",
+        "visibility",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TestAttempt": {
+      "title": "TestAttempt",
+      "description": "Record of a completed PYQ practice session or AI custom mock test for performance insights.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID matching request.auth.uid."
+        },
+        "testTitle": {
+          "type": "string",
+          "description": "Human-readable title of the PYQ paper or AI mock test."
+        },
+        "testType": {
+          "type": "string",
+          "enum": ["PYQ_PRACTICE", "FULL_MOCK", "AI_CUSTOM_MOCK", "STUDY_PLAN_DRILL"],
+          "description": "Category of the test session."
+        },
+        "subjectFilter": {
+          "type": "string",
+          "description": "Primary subject or 'All Subjects'."
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Total questions in the test."
+        },
+        "attemptedCount": {
+          "type": "integer",
+          "description": "Number of questions attempted by the user."
+        },
+        "correctCount": {
+          "type": "integer",
+          "description": "Number of correct answers."
+        },
+        "incorrectCount": {
+          "type": "integer",
+          "description": "Number of incorrect answers."
+        },
+        "scoreObtained": {
+          "type": "integer",
+          "description": "Net JEE score obtained (+4 for correct, -1 for wrong MCQ)."
+        },
+        "maxScore": {
+          "type": "integer",
+          "description": "Maximum possible score for the test."
+        },
+        "accuracyPercent": {
+          "type": "integer",
+          "description": "Accuracy percentage (0-100)."
+        },
+        "timeSpentSeconds": {
+          "type": "integer",
+          "description": "Total time spent in seconds."
+        },
+        "xpEarned": {
+          "type": "integer",
+          "description": "Gamification XP points awarded for this session."
+        },
+        "weakTopics": {
+          "type": "array",
+          "description": "Topics where accuracy was low or questions were missed (max 20)."
+        },
+        "strongTopics": {
+          "type": "array",
+          "description": "Topics where accuracy was strong (max 20)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "testTitle",
+        "testType",
+        "subjectFilter",
+        "totalQuestions",
+        "attemptedCount",
+        "correctCount",
+        "incorrectCount",
+        "scoreObtained",
+        "maxScore",
+        "accuracyPercent",
+        "timeSpentSeconds",
+        "xpEarned",
+        "weakTopics",
+        "strongTopics",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StudyPlanTask": {
+      "title": "StudyPlanTask",
+      "description": "A scheduled daily or weekly study/revision task prioritizing weak areas and PYQs.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID matching request.auth.uid."
+        },
+        "dayLabel": {
+          "type": "string",
+          "description": "Day or week slot label (e.g., 'Day 1 • Today')."
+        },
+        "subject": {
+          "type": "string",
+          "enum": ["Physics", "Chemistry", "Mathematics"],
+          "description": "Subject name."
+        },
+        "topic": {
+          "type": "string",
+          "description": "Chapter or topic focus."
+        },
+        "activityType": {
+          "type": "string",
+          "enum": ["CONCEPT_REVIEW", "PYQ_DRILL", "AI_MOCK_TEST", "FORMULA_REVISION"],
+          "description": "Type of study activity."
+        },
+        "targetPyqCount": {
+          "type": "integer",
+          "description": "Number of PYQs to solve in this block."
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "description": "Planned duration in minutes."
+        },
+        "priorityLevel": {
+          "type": "string",
+          "enum": ["HIGH_WEAK_AREA", "MEDIUM_PRACTICE", "REVISION"],
+          "description": "Priority tag derived from performance insights."
+        },
+        "completed": {
+          "type": "boolean",
+          "description": "Whether the aspirant has completed this task."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "dayLabel",
+        "subject",
+        "topic",
+        "activityType",
+        "targetPyqCount",
+        "durationMinutes",
+        "priorityLevel",
+        "completed",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BookmarkedQuestion": {
+      "title": "BookmarkedQuestion",
+      "description": "A saved PYQ question with personal revision notes.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner UID matching request.auth.uid."
+        },
+        "questionId": {
+          "type": "string",
+          "description": "Identifier of the bookmarked PYQ question."
+        },
+        "subject": {
+          "type": "string",
+          "enum": ["Physics", "Chemistry", "Mathematics"],
+          "description": "Subject of the question."
+        },
+        "topic": {
+          "type": "string",
+          "description": "Topic of the question."
+        },
+        "personalNote": {
+          "type": "string",
+          "description": "User's personal takeaway or formula reminder."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp (clients must submit FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp (clients must submit FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "questionId",
+        "subject",
+        "topic",
+        "personalNote",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/leaderboard/{userId}": {
+      "schema": { "$ref": "#/entities/LeaderboardProfile" },
+      "description": "Public gamification leaderboard entries keyed by userId."
+    },
+    "/test_attempts/{attemptId}": {
+      "schema": { "$ref": "#/entities/TestAttempt" },
+      "description": "Completed PYQ and AI mock test attempts per user."
+    },
+    "/study_tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/StudyPlanTask" },
+      "description": "Personalized study plan tasks per user."
+    },
+    "/bookmarks/{bookmarkId}": {
+      "schema": { "$ref": "#/entities/BookmarkedQuestion" },
+      "description": "Bookmarked PYQ questions and notes per user."
+    }
+  }
+}

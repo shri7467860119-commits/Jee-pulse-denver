@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">JEE Pulse</string>
+    <string name="tagline">PYQ Studio • AI Mock Lab • Weak-Area Mastery</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="nav_home">Dashboard</string>
+    <string name="nav_pyq_Arena">PYQ Arena</string>
+    <string name="nav_insights">Weak Areas</string>
+    <string name="nav_study_plan">Study Plan</string>
+    <string name="nav_leaderboard">Rank &amp; XP</string>
+    <string name="security_prototype_notice">Prototype Notice: Gemini AI calls use BuildConfig key configuration.</string>
+</resources>
